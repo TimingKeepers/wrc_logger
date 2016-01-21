@@ -1,0 +1,96 @@
+#!/bin/bash
+################################################################################
+##
+## Script that logs the synchronization status in WR-devices and check that
+## the servo state is "TRACK_PHASE"
+##
+## Authors:
+##	- Felipe Torres González (torresfelipex1<AT>gmail.com)
+##
+## System requirements: sshpass
+##
+## GNU Lesser General Public License Usage
+## This file may be used under the terms of the GNU Lesser
+## General Public License version 2.1 as published by the Free Software
+## Foundation and appearing in the file LICENSE.LGPL included in the
+## packaging of this file.  Please review the following information to
+## ensure the GNU Lesser General Public License version 2.1 requirements
+## will be met: http://www.gnu.org/licenses/old-licenses/lgpl-2.1.html.
+################################################################################
+
+# Flag to enable sync check
+SYNC=
+
+# Temperature interval
+TEMP=
+
+# Set the remote server (ip or name)
+REMOTE="zen"
+# Time interval to check the sync status (seconds)
+INTERVAL=60
+# Remote username (in the WRZEN is 'root' & pass 'root')
+REMOTE_USER='root'
+REMOTE_PASS='root'
+
+SSH_OPTIONS="-o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o LogLevel=error"
+
+TEST="/root/tools/zen/zen-vuart -c stat"
+
+# File where the result of each check will be stored
+LOG_FILE="zen.log"
+
+# The python tool to check the stat output
+PYTOOL=./check_status.py
+
+runtest()
+{
+  echo -e "\033[1mChecking connection with $REMOTE...\033[0m"
+  ping -c 1 $REMOTE &> /dev/null
+  if [ $? -ne 0 ]; then
+    echo -e "\e[31mCould not connect with $REMOTE\033[0m"
+    exit 1
+  fi
+  echo -e "\033[1mRunning test in the remote WR-ZEN...\033[0m"
+  stat=$(sshpass -p $REMOTE_PASS ssh $SSH_OPTIONS $REMOTE_USER@$REMOTE $TEST 2>&1)
+  echo $stat >> temp
+
+  PYTOOL_FLAGS="$SYNC $TEMP"
+  echo -e ">>> zen@$REMOTE -- $(date "+%H:%M:%S %d-%m-%Y")" >> $LOG_FILE
+  $PYTOOL temp $PYTOOL_FLAGS >> $LOG_FILE
+  rm temp
+}
+
+# -------------------------------------------
+
+help()
+{
+cat << EOF
+Usage: $(basename $0) [options]
+
+Options:
+-h|--help           Prints this help
+-d|--debug          Prints debug info
+-r|--remote         Set the reintervalmote (IP or name)
+-i|--interval       Seconds between sync checking
+-s|--sync           Enable synchronization checking
+-t|--temp min,max   Enable temperature checking
+
+EOF
+exit 0
+}
+
+
+while [ $# -gt 0 ]; do # Until you run out of parameters . . .
+  case "$1" in
+    -h|--help) help;;
+    -d|--debug) debug=1;;
+    -r|--remote) REMOTE=$2;shift;;
+    -i|--interval) INTERVAL=$2;shift;;
+    -t|--temp) TEMP="-t $2";shift;;
+    -s|--sync) SYNC="-s";;
+    *) echo "Unknown arg: $1"; help;;
+  esac
+  shift   # Check next set of parameters.
+done
+
+runtest
