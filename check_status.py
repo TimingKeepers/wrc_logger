@@ -46,6 +46,8 @@ class Log_Checker():
         '''
         try:
             self.log = open(filein, 'r')
+            self.file = self.log.readlines()
+            self.log.close()
         except Exception as e:
             print("The file %s could not be opened" % filein)
             raise e
@@ -64,17 +66,15 @@ class Log_Checker():
             How many times sync is lost
         '''
         sync_lost = 0
-        line = self.log.readline()
         ss = ""
 
-        while (line != ""):
+        for line in self.file:
             servostate = self.ss_regex.search(line)
             if servostate is not None:
                 ss = servostate.group(1)
             if ss != state and servostate is not None:
                 print(line)
                 sync_lost += 1
-            line = self.log.readline()
 
         return sync_lost
 
@@ -89,18 +89,16 @@ class Log_Checker():
         Returns:
             How many times temp is out of range
         '''
-        line = self.log.readline()
         temp_out = 0
         t = "0"
 
-        while (line != ""):
+        for line in self.file:
             temp = self.temp_regex.search(line)
             if temp is not None:
                 t = temp.group(0)
             if not (min < float(t) < max) and temp is not None:
                 print("Temp out of range : %s" % t)
                 temp_out += 1
-            line = self.log.readline()
 
         return temp_out
 
@@ -112,7 +110,7 @@ def main():
     parser.add_argument('-s','--sync', help=("Check sync"),default=False, \
     action="store_true")
     parser.add_argument('-t','--temp', help=("Check temp range [min,max]"), \
-    nargs='+',type=float)
+    nargs='?',type=str)
 
     args = parser.parse_args()
 
@@ -125,12 +123,15 @@ def main():
             print("The WR synchronization is OK")
         else:
             print("WR sync have been lost (%d) times" % sync_failures)
-    if len(args.temp) == 2:
-        temp_failures = lc.check_temp(args.temp[0],args.temp[1])
-        if not temp_failures:
-            print("The temperature was in range")
-        else:
-            print("Temperature was out of range %d times" % temp_failures)
+    if args.temp is not None:
+        temp = [float(i) for i in args.temp.split(",")]
+        if len(temp) >= 2:
+            temp_failures = lc.check_temp(temp[0], temp[1])
+            if not temp_failures:
+                print("The temperature was in range")
+            else:
+                print("Temperature was out of range %d times" % temp_failures)
+        else: print("Error: Temp checking needs 2 parameters: min, max")
 
     return (sync_failures+temp_failures)
 
