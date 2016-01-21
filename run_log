@@ -37,7 +37,7 @@ SSH_OPTIONS="-o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o LogL
 TEST="/root/tools/zen/zen-vuart -c stat"
 
 # File where the result of each check will be stored
-LOG_FILE="zen.log"
+LOG_FILE=""
 
 # The python tool to check the stat output
 PYTOOL=./check_status.py
@@ -55,8 +55,14 @@ runtest()
   echo $stat >> temp
 
   PYTOOL_FLAGS="$SYNC $TEMP"
-  echo -e ">>> zen@$REMOTE -- $(date "+%H:%M:%S %d-%m-%Y")" >> $LOG_FILE
-  $PYTOOL temp $PYTOOL_FLAGS >> $LOG_FILE
+  $PYTOOL temp $PYTOOL_FLAGS > temp
+  if [ $LOG_FILE == "" ]; then
+    echo -e ">>> zen@$REMOTE -- $(date "+%H:%M:%S %d-%m-%Y")" 2>&1
+    cat temp
+  else
+    echo -e ">>> zen@$REMOTE -- $(date "+%H:%M:%S %d-%m-%Y")" >> $LOG_FILE
+    cat temp >> $LOG_FILE
+  fi
   rm temp
 }
 
@@ -69,11 +75,12 @@ Usage: $(basename $0) [options]
 
 Options:
 -h|--help           Prints this help
--d|--debug          Prints debug info
+-v|--verbose        Enables verbose mode
 -r|--remote         Set the reintervalmote (IP or name)
 -i|--interval       Seconds between sync checking
 -s|--sync           Enable synchronization checking
 -t|--temp min,max   Enable temperature checking
+-o|--output         Write output to file
 
 EOF
 exit 0
@@ -83,11 +90,12 @@ exit 0
 while [ $# -gt 0 ]; do # Until you run out of parameters . . .
   case "$1" in
     -h|--help) help;;
-    -d|--debug) debug=1;;
+    -v|--verbose) VERBOSE=1;;
     -r|--remote) REMOTE=$2;shift;;
     -i|--interval) INTERVAL=$2;shift;;
     -t|--temp) TEMP="-t $2";shift;;
     -s|--sync) SYNC="-s";;
+    -o|--output) LOG_FILE=$2;shift;;
     *) echo "Unknown arg: $1"; help;;
   esac
   shift   # Check next set of parameters.
