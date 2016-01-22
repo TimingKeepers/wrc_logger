@@ -37,7 +37,7 @@ SSH_OPTIONS="-o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o LogL
 TEST="/root/tools/zen/zen-vuart -c stat"
 
 # File where the result of each check will be stored
-LOG_FILE=""
+LOG_FILE="x"
 
 # The python tool to check the stat output
 PYTOOL=./check_status.py
@@ -54,9 +54,9 @@ runtest()
   stat=$(sshpass -p $REMOTE_PASS ssh $SSH_OPTIONS $REMOTE_USER@$REMOTE $TEST 2>&1)
   echo $stat >> temp
 
-  PYTOOL_FLAGS="$SYNC $TEMP"
+  PYTOOL_FLAGS="$SYNC $TEMP $VERBOSE"
   $PYTOOL temp $PYTOOL_FLAGS > temp
-  if [ $LOG_FILE == "" ]; then
+  if [ $LOG_FILE == "x" ]; then
     echo -e ">>> zen@$REMOTE -- $(date "+%H:%M:%S %d-%m-%Y")" 2>&1
     cat temp
   else
@@ -90,7 +90,7 @@ exit 0
 while [ $# -gt 0 ]; do # Until you run out of parameters . . .
   case "$1" in
     -h|--help) help;;
-    -v|--verbose) VERBOSE=1;;
+    -v|--verbose) VERBOSE="-v";;
     -r|--remote) REMOTE=$2;shift;;
     -i|--interval) INTERVAL=$2;shift;;
     -t|--temp) TEMP="-t $2";shift;;
