@@ -1,0 +1,3 @@
+[submodule "py7slib"]
+	path = py7slib
+	url = https://felipet@bitbucket.org/sevensols/py7slib.git
