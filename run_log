@@ -18,6 +18,16 @@
 ## will be met: http://www.gnu.org/licenses/old-licenses/lgpl-2.1.html.
 ################################################################################
 
+# How to interface with the WR device under test
+CONN=ssh
+
+# Etherbone variables
+ETHBONE_DISCOVER=./bin/eb-discover
+ETHBONE_DISCOVER_FLAGS=udp/
+
+# Virtual UART Tool
+VUART=./py7slib/shell.py
+
 # Flag to enable sync check
 SYNC=
 
@@ -27,7 +37,7 @@ TEMP=
 # Set the remote server (ip or name)
 REMOTE="zen"
 # Time interval to check the sync status (seconds)
-INTERVAL=60
+INTERVAL="x"
 # Remote username (in the WRZEN is 'root' & pass 'root')
 REMOTE_USER='root'
 REMOTE_PASS='root'
@@ -42,7 +52,7 @@ LOG_FILE="x"
 # The python tool to check the stat output
 PYTOOL=./check_status.py
 
-runtest()
+runsshtest()
 {
   echo -e "\033[1mChecking connection with $REMOTE...\033[0m"
   ping -c 1 $REMOTE &> /dev/null
@@ -68,6 +78,31 @@ runtest()
 
 # -------------------------------------------
 
+runethtest()
+{
+  echo -e "\033[1mChecking connection with $REMOTE...\033[0m"
+  $ETHBONE_DISCOVER $ETHBONE_DISCOVER_FLAGS$REMOTE > temp
+  size=$(cat temp | wc -l)
+  if [ $size -lt 1 ]; then  # check the return code by eb-discover
+    echo -e "\e[31mCould not connect with $REMOTE\033[0m"
+    exit 1
+  fi
+  echo -e "\033[1mRunning test in the remote WR-LEN...\033[0m"
+  echo "stat" > temp
+  $VUART -i temp -o temp2 $REMOTE
+
+  if [ $LOG_FILE == "x" ]; then
+    echo -e ">>> len@$REMOTE -- $(date "+%H:%M:%S %d-%m-%Y")" 2>&1
+    cat temp2
+  else
+    echo -e ">>> len@$REMOTE -- $(date "+%H:%M:%S %d-%m-%Y")" >> $LOG_FILE
+    cat temp2 >> $LOG_FILE
+  fi
+  rm temp temp2
+}
+
+# -------------------------------------------
+
 help()
 {
 cat << EOF
@@ -81,6 +116,10 @@ Options:
 -s|--sync           Enable synchronization checking
 -t|--temp min,max   Enable temperature checking
 -o|--output         Write output to file
+-l|--conn opt       How to connect with the WR device
+                    Options are:
+                    · "ssh"     for WR-ZEN (linux)
+                    · "ethbone" for WR-LEN (Etherbone)
 
 EOF
 exit 0
@@ -96,9 +135,24 @@ while [ $# -gt 0 ]; do # Until you run out of parameters . . .
     -t|--temp) TEMP="-t $2";shift;;
     -s|--sync) SYNC="-s";;
     -o|--output) LOG_FILE=$2;shift;;
+    -l|--conn) CONN=$2; shift;;
     *) echo "Unknown arg: $1"; help;;
   esac
   shift   # Check next set of parameters.
 done
 
-runtest
+if [ $CONN == "ssh" ]; then
+  echo -e "\033[1mRunning test over ssh\n\033[0m"
+  runsshtest
+elif [ $CONN == "ethbone" ]; then
+  echo -e "\033[1mRunning test over Etherbone\n\033[0m"
+  if [ $INTERVAL != "x" ]; then
+    while [ 1 -lt 4 ]
+    do
+      runethtest
+      sleep $INTERVAL
+    done
+  fi
+else
+  echo -e "\033[31Invalid connection seleted, valid types are: ssh or eth\n\033[0m"
+fi
