@@ -185,7 +185,15 @@ done
 
 if [ $CONN == "ssh" ]; then
   echo -e "\033[1mRunning test over ssh\n\033[0m"
+  if [ $INTERVAL != "x" ]; then
+    while true
+    do
+      runsshtest
+      sleep $INTERVAL
+    done
+  fi
   runsshtest
+  ctrl_c
 elif [ $CONN == "ethbone" ]; then
   echo -e "\033[1mRunning test over Etherbone\n\033[0m"
   if [ $INTERVAL != "x" ]; then
