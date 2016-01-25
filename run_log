@@ -52,6 +52,12 @@ LOG_FILE="x"
 # The python tool to check the stat output
 PYTOOL=./check_status.py
 
+CHECK="x"
+
+# Trap Ctrl-C and call ctrl_c() to end the test
+trap ctrl_c INT
+
+# Run the test using a ssh connection
 runsshtest()
 {
   echo -e "\033[1mChecking connection with $REMOTE...\033[0m"
@@ -64,8 +70,6 @@ runsshtest()
   stat=$(sshpass -p $REMOTE_PASS ssh $SSH_OPTIONS $REMOTE_USER@$REMOTE $TEST 2>&1)
   echo $stat >> temp
 
-  PYTOOL_FLAGS="$SYNC $TEMP $VERBOSE"
-  $PYTOOL temp $PYTOOL_FLAGS > temp
   if [ $LOG_FILE == "x" ]; then
     echo -e ">>> zen@$REMOTE -- $(date "+%H:%M:%S %d-%m-%Y")" 2>&1
     cat temp
@@ -78,6 +82,7 @@ runsshtest()
 
 # -------------------------------------------
 
+# Run the test using an Etherbone connection
 runethtest()
 {
   echo -e "\033[1mChecking connection with $REMOTE...\033[0m"
@@ -103,6 +108,41 @@ runethtest()
 
 # -------------------------------------------
 
+ctrl_c()
+{
+  # Called from ctrl-c
+  if [ $CHECK == "x" ]; then
+    CHECK_LOG=$LOG_FILE
+  else
+    if [[ $SYNC != "-s" && $TEMP != *"-t"* ]]; then
+      echo -e "\033[31mYou must specify a checking argument: \033[1m-s or -t\033[0m"
+      exit 3
+    else
+      CHECK_LOG=$CHECK
+    fi
+  fi
+  # Check the raw log if it exists
+  if [ -f $CHECK_LOG ]; then
+    echo -e "\033[1mChecking the raw generated log...\033[0m"
+    PYTOOL_FLAGS="$SYNC $TEMP $VERBOSE"
+    $PYTOOL $CHECK_LOG $PYTOOL_FLAGS > temp
+    if [ $? -gt 0 ]; then
+      echo -e "\033[31mSome errors occured:\033[0m"
+      cat temp
+      rm temp
+      exit 2
+    else
+      echo -e "\033[34mNo errors occured\033[0m"
+      exit 0
+    fi
+  else
+    echo -e "\033[1mNo LOG file to check, bye!\033[0m"
+    exit 0
+  fi
+}
+
+# -------------------------------------------
+
 help()
 {
 cat << EOF
@@ -111,11 +151,12 @@ Usage: $(basename $0) [options]
 Options:
 -h|--help           Prints this help
 -v|--verbose        Enables verbose mode
--r|--remote         Set the reintervalmote (IP or name)
+-r|--remote         Remote device (IP or name)
 -i|--interval       Seconds between sync checking
 -s|--sync           Enable synchronization checking
 -t|--temp min,max   Enable temperature checking
 -o|--output         Write output to file
+-c|--check [log]    Only check a raw test log (bug: use in the last position)
 -l|--conn opt       How to connect with the WR device
                     Options are:
                     · "ssh"     for WR-ZEN (linux)
@@ -136,6 +177,7 @@ while [ $# -gt 0 ]; do # Until you run out of parameters . . .
     -s|--sync) SYNC="-s";;
     -o|--output) LOG_FILE=$2;shift;;
     -l|--conn) CONN=$2; shift;;
+    -c|--check) CHECK=$2; ctrl_c $CHECK; shift;;
     *) echo "Unknown arg: $1"; help;;
   esac
   shift   # Check next set of parameters.
@@ -147,12 +189,14 @@ if [ $CONN == "ssh" ]; then
 elif [ $CONN == "ethbone" ]; then
   echo -e "\033[1mRunning test over Etherbone\n\033[0m"
   if [ $INTERVAL != "x" ]; then
-    while [ 1 -lt 4 ]
+    while true
     do
       runethtest
       sleep $INTERVAL
     done
   fi
+  runethtest
+  ctrl_c
 else
   echo -e "\033[31Invalid connection seleted, valid types are: ssh or eth\n\033[0m"
 fi
