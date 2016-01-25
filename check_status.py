@@ -136,13 +136,14 @@ def main():
             elif not temp_failures[0] and args.verbose:
                 print("The temperature was in range : %f" % (temp_failures[1]))
             else:
-                print("Temperature was out of range:")
+                print("Temperature was out of range")
                 if args.verbose:
                     print("Mean temperature : %.2f ºC (range=[%.2f,%.2f])" % \
                     (temp_failures[1],temp[0],temp[1]))
         else: print("Error: Temp checking needs 2 parameters: min, max")
 
-    return (sync_failures+temp_failures[0])
+    exit (sync_failures+ (temp_failures[0] if isinstance(temp_failures, tuple)\
+    else temp_failures))
 
 if __name__ == '__main__':
     main()
