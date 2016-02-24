@@ -1,0 +1,32 @@
+#!/usr/bin/python
+
+import RPi.GPIO as GPIO
+import time
+import sys
+GPIO.setmode(GPIO.BCM)
+
+WRLEN = [17, 27, 22]    #Pines de conexion de los reles de las WR-LEN
+GPIO.setwarnings(False)
+GPIO.setup(WRLEN[0], GPIO.OUT)
+GPIO.setup(WRLEN[1], GPIO.OUT)
+GPIO.setup(WRLEN[2], GPIO.OUT)
+
+def apaga(len):
+        GPIO.output(len, GPIO.LOW)
+        print 'Off',len
+
+def enciende(len):
+        GPIO.output(len, GPIO.HIGH)
+        print "On", len
+
+if __name__ == "__main__":
+        if str(sys.argv[1]) == '-h':
+                print "usage: python gpi.py <number> <status>"
+                print
+                print "where:"
+                print "\t -number is 17 or 22 or 27"
+                print "\t -status on or off"
+        elif str(sys.argv[2]) == 'on':
+                enciende(int(sys.argv[1]))
+        elif str(sys.argv[2]) == 'off':
+                apaga(int(sys.argv[1]))
