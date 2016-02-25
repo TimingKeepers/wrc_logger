@@ -42,7 +42,8 @@ the key combination *ctrl-c*. Then the test will check the raw log generated.
 Allows to turn on or off the GPIO pins
 
 ## Installation
-In order to use this tool first modify your /etc/sudores file and add under root
+In order to use this tool first modify your /etc/sudores file and add under root:
+
 {USERNAME} ALL=(ALL) NOPASSWD: /usr/local/bin gpio
 
 ## Usage
