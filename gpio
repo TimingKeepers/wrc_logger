@@ -1,4 +1,6 @@
 #!/usr/bin/python
+#/etc/sudoers add rule under sudo: 
+#pi ALL=(ALL) NOPASSWD: /usr/local/bin gpio
 
 import RPi.GPIO as GPIO
 import time
@@ -7,9 +9,13 @@ GPIO.setmode(GPIO.BCM)
 
 WRLEN = [17, 27, 22]    #Pines de conexion de los reles de las WR-LEN
 GPIO.setwarnings(False)
-GPIO.setup(WRLEN[0], GPIO.OUT)
-GPIO.setup(WRLEN[1], GPIO.OUT)
-GPIO.setup(WRLEN[2], GPIO.OUT)
+
+try:
+        GPIO.setup(WRLEN[0], GPIO.OUT)
+        GPIO.setup(WRLEN[1], GPIO.OUT)
+        GPIO.setup(WRLEN[2], GPIO.OUT)
+except Exception as e:
+        print e
 
 def apaga(len):
         GPIO.output(len, GPIO.LOW)
@@ -22,9 +28,17 @@ def enciende(len):
 if __name__ == "__main__":
         if len(sys.argv) > 2:
                 if str(sys.argv[2]) == 'on':
-                        enciende(int(sys.argv[1]))
+                        try:
+                                enciende(int(sys.argv[1]))
+                        except Exception as e:
+                                print e
+
                 elif str(sys.argv[2]) == 'off':
-                        apaga(int(sys.argv[1]))
+                        try:
+                                apaga(int(sys.argv[1]))
+                        except Exception as e:
+                                print e
+
         else:
                 print "usage: python gpi.py <number> <status>"
                 print
