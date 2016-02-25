@@ -1,7 +1,7 @@
 # WRC LOGGER
 A tool to monitor the status of a WR device running the WR Core
 
-# How to use it
+## Usage
 Execute run_log with the following parameters:
 
 * **-v | --verbose** : Enables extra information to the output of the program.
@@ -36,3 +36,18 @@ want, ie. -c and/or -t. Example:
 
 If you use the option *-i* the test will run in continuous mode till you press
 the key combination *ctrl-c*. Then the test will check the raw log generated.
+
+
+# GPIO Tool
+Allows to turn on or off the GPIO pins
+
+## Installation
+In order to use this tool first modify your /etc/sudores file and add under root
+{USERNAME} ALL=(ALL) NOPASSWD: /usr/local/bin gpio
+
+## Usage
+* **number**   : Change GPIO pin, only allow 17, 22 and 27. Example:
+        gpio 17 on
+
+* **status**   : Turn on or off the GPI. Example:
+        gpio 17 off
