@@ -20,13 +20,14 @@ def enciende(len):
         print "On", len
 
 if __name__ == "__main__":
-        if str(sys.argv[1]) == '-h':
+        if len(sys.argv) > 2:
+                if str(sys.argv[2]) == 'on':
+                        enciende(int(sys.argv[1]))
+                elif str(sys.argv[2]) == 'off':
+                        apaga(int(sys.argv[1]))
+        else:
                 print "usage: python gpi.py <number> <status>"
                 print
                 print "where:"
                 print "\t -number is 17 or 22 or 27"
                 print "\t -status on or off"
-        elif str(sys.argv[2]) == 'on':
-                enciende(int(sys.argv[1]))
-        elif str(sys.argv[2]) == 'off':
-                apaga(int(sys.argv[1]))
