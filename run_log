@@ -63,6 +63,23 @@ CHECK="x"
 # Trap Ctrl-C and call ctrl_c() to end the test
 trap ctrl_c INT
 
+# -------------------------------------------
+
+# Function to check if a device is alive
+check_alive()
+{
+    if [ $VERBOSE_MSG != 0 ]; then
+        echo -e "\033[1mChecking connection with $REMOTE_NAME ($REMOTE_ADDR)...\033[0m"
+    fi
+    ping -c 1 $1 &> /dev/null
+    if [ $? -ne 0 ]; then
+      echo -e "\e[31mCould not connect with $REMOTE_NAME($REMOTE_ADDR)\033[0m"
+      exit 1
+    fi
+}
+
+# -------------------------------------------
+
 # Run the test using a ssh connection
 runsshtest()
 {
