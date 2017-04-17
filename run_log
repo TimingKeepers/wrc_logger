@@ -6,6 +6,7 @@
 ##
 ## Authors:
 ##	- Felipe Torres González (torresfelipex1<AT>gmail.com)
+##	
 ##
 ## System requirements: sshpass
 ##
@@ -17,6 +18,12 @@
 ## ensure the GNU Lesser General Public License version 2.1 requirements
 ## will be met: http://www.gnu.org/licenses/old-licenses/lgpl-2.1.html.
 ################################################################################
+
+# Enable verbose message output from the script
+VERBOSE_MSG=0
+
+# WRSTAT log (save calls to the wrc)
+WRSTAT="x"
 
 # How to interface with the WR device under test
 CONN=ssh
