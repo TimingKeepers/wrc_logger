@@ -33,6 +33,12 @@ SYNC=
 
 # Temperature interval
 TEMP=
+# BUS used for external sensors
+BUS="w1"
+BUS_PATH=/sys/bus/$BUS/devices/
+# DS18B20+ OneWire sensors have an unique address starting by 28
+SENSOR_HADDR="28"
+SENSORS=0
 
 # Set the remote server (ip or name)
 REMOTE="zen"
