@@ -80,6 +80,40 @@ check_alive()
 
 # -------------------------------------------
 
+# Function to scan a bus and search for valid temperature sensors
+search_tsensors()
+{
+    sensors=$(ls $BUS_PATH)
+    for entry in $sensors
+    do
+        haddr=$(echo $entry | cut -d'-' -f1)
+        if [ $haddr == $SENSOR_HADDR ]
+        then
+            if [ $VERBOSE_MSG -eq 1 ]; then
+                echo "Temperature sensor detected: $entry"
+            fi
+            SENSORS_ARRAY[$SENSORS]=$entry
+            SENSORS=$(($SENSORS+1))
+        fi
+    done
+}
+
+# -------------------------------------------
+
+# Function to read temperature sensors
+read_tsensors()
+{
+    for s in ${SENSORS_ARRAY[@]}
+    do
+        temp=$(cat $BUS_PATH/$s/w1_slave)
+        temp=$(echo $temp | grep -oh "t=[0-9]\{5\}" | cut -d'=' -f2)
+        temp=$(echo "scale=3;$temp/1000" | bc)
+        echo -e "$s:$temp \c"
+    done
+}
+
+# -------------------------------------------
+
 # Run the test using a ssh connection
 runsshtest()
 {
