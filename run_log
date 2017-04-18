@@ -172,6 +172,18 @@ temp_range_check()
 }
 
 # -------------------------------------------
+
+wrstat()
+{
+    echo "stat" > temp
+    $VUART -i temp -o temp2 $REMOTE
+    WRSTAT=`cat ./temp2`
+    rm temp temp2	
+    echo $WRSTAT
+}
+
+# -------------------------------------------
+
 # Run the test using a ssh connection
 runsshtest()
 {
