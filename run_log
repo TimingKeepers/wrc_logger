@@ -48,7 +48,7 @@ SENSOR_HADDR="28"
 SENSORS=0
 
 # Set the remote server (ip or name)
-REMOTE="zen"
+REMOTE=192.168.5.9
 # Time interval to check the sync status (seconds)
 INTERVAL="x"
 # Remote username (in the WRZEN is 'root' & pass 'root')
@@ -121,6 +121,27 @@ read_tsensors()
 
 # -------------------------------------------
 
+# Function to get temperature from external sensors (1W) and
+# from the WRC (stat)
+temp_check()
+{
+    if [[ $VERBOSE_MSG -eq 1 ]]; then
+        echo -e "Checking temperatures..."
+    fi
+    search_tsensors
+    cur_temp=$(read_tsensors)
+    if [ $WRSTAT == "x" ]; then
+	echo "stat" > temp
+  	$VUART -i temp -o temp2 $REMOTE
+	WRSTAT=`cat ./temp2` 
+	#WRSTAT=$($VUART -i temp $REMOTE | tail -6)
+    fi
+    wrc_temp=$(echo $WRSTAT | grep -oh "temp: [0-9.]\{5\}.")
+    echo "$cur_temp $wrc_temp"
+    rm temp temp2
+}
+
+# -------------------------------------------
 # Run the test using a ssh connection
 runsshtest()
 {
