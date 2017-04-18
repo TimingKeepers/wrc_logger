@@ -47,6 +47,12 @@ BUS_PATH=/sys/bus/$BUS/devices/
 SENSOR_HADDR="28"
 SENSORS=0
 
+# Enable oven Switchoff
+#   This variable allows to connect a relay to the Host to switchoff the
+#   equipment if the maximum temperature is reached.
+OVENSWITCH="OFF"
+GPIOVEN=17
+
 # Set the remote server (ip or name)
 REMOTE=192.168.5.9
 # Time interval to check the sync status (seconds)
@@ -139,6 +145,30 @@ temp_check()
     wrc_temp=$(echo $WRSTAT | grep -oh "temp: [0-9.]\{5\}.")
     echo "$cur_temp $wrc_temp"
     rm temp temp2
+}
+
+# -------------------------------------------
+
+temp_range_check()
+{
+	wrs_temps=$1
+	if [[ $SENSOR_TAG == "temp" ]]; then
+		temp_sensor=$(echo $wrs_temps | grep -oh "$SENSOR_TAG: [0-9.]\{5\}." | cut -d' ' -f2)
+		temp_sensor=${temp_sensor%.*}
+
+	else
+		temp_sensor=$(echo $wrs_temps | grep -oh "$SENSOR_TAG:[0-9.]\{4\}." | cut -d':' -f2)
+		temp_sensor=${temp_sensor%.*}
+	fi
+
+	if [ $OVENSWITCH == "ON" ]; then
+	    if [[ $temp_sensor -gt $MAX || $temp_sensor -lt $MIN ]]; then
+                echo -e "\nTemperature exceeded ($temp_sensorºC)"
+			    echo "Turning off..."
+			    python gpio.py $GPIOVEN off
+			    exit 1
+	    fi
+    fi
 }
 
 # -------------------------------------------
