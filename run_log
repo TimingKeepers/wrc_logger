@@ -1,14 +1,14 @@
 #!/bin/bash
 ################################################################################
 ##
-## Script that logs the synchronization status in WR-devices and check that
+## Script that logs the synchronization status in WR-LEN and check that
 ## the servo state is "TRACK_PHASE"
 ##
 ## Authors:
 ##	- Felipe Torres González (torresfelipex1<AT>gmail.com)
-##	
+##	- Daniel Melgarejo García
 ##
-## System requirements: sshpass
+## System requirements: Etherbone
 ##
 ## GNU Lesser General Public License Usage
 ## This file may be used under the terms of the GNU Lesser
