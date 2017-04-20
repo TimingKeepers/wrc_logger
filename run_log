@@ -271,6 +271,41 @@ runethtest()
 
 # -------------------------------------------
 
+# Trap for the ctrl-c key combination
+ctrl_c()
+{
+    # Called from ctrl-c
+    echo -e "\033[1mBye!\033[0m"
+    exit 0
+}
+
+# ------------------------------------------
+
+help()
+{
+cat << EOF
+Usage: $(basename $0) [options]
+
+Options:
+-h|--help           Prints this help
+-v|--verbose        Enables verbose mode
+-r|--remote         Remote address (IP)
+-i|--interval       Checking rate
+-d|--header         Write a description header of the log values
+-s|--sync           Enable synchronization checking
+                    Levels:
+                        1 -> Servo state
+                        2 -> 1 + RTT and Bitslides
+-t|--temp min,max   Enable temperature checking
+-x|--secureoff      Switchoff oven when temp max is reached.
+                    User must specify the lower address of the temp sensor
+
+EOF
+exit 0
+}
+
+# -------------------------------------------
+
 ctrl_c()
 {
   # Called from ctrl-c
