@@ -219,56 +219,6 @@ sync_check()
     fi
 }
 
-
-# Run the test using a ssh connection
-runsshtest()
-{
-  echo -e "\033[1mChecking connection with $REMOTE...\033[0m"
-  ping -c 1 $REMOTE &> /dev/null
-  if [ $? -ne 0 ]; then
-    echo -e "\e[31mCould not connect with $REMOTE\033[0m"
-    exit 1
-  fi
-  echo -e "\033[1mRunning test in the remote WR-ZEN...\033[0m"
-  stat=$(sshpass -p $REMOTE_PASS ssh $SSH_OPTIONS $REMOTE_USER@$REMOTE $TEST 2>&1)
-  echo $stat >> temp
-
-  if [ $LOG_FILE == "x" ]; then
-    echo -e ">>> zen@$REMOTE -- $(date "+%H:%M:%S %d-%m-%Y")" 2>&1
-    cat temp
-  else
-    echo -e ">>> zen@$REMOTE -- $(date "+%H:%M:%S %d-%m-%Y")" >> $LOG_FILE
-    cat temp >> $LOG_FILE
-  fi
-  rm temp
-}
-
-# -------------------------------------------
-
-# Run the test using an Etherbone connection
-runethtest()
-{
-  echo -e "\033[1mChecking connection with $REMOTE...\033[0m"
-  $ETHBONE_DISCOVER $ETHBONE_DISCOVER_FLAGS$REMOTE > temp
-  size=$(cat temp | wc -l)
-  if [ $size -lt 1 ]; then  # check the return code by eb-discover
-    echo -e "\e[31mCould not connect with $REMOTE\033[0m"
-    exit 1
-  fi
-  echo -e "\033[1mRunning test in the remote WR-LEN...\033[0m"
-  echo "stat" > temp
-  $VUART -i temp -o temp2 $REMOTE
-
-  if [ $LOG_FILE == "x" ]; then
-    echo -e ">>> len@$REMOTE -- $(date "+%H:%M:%S %d-%m-%Y")" 2>&1
-    cat temp2
-  else
-    echo -e ">>> len@$REMOTE -- $(date "+%H:%M:%S %d-%m-%Y")" >> $LOG_FILE
-    cat temp2 >> $LOG_FILE
-  fi
-  rm temp temp2
-}
-
 # -------------------------------------------
 
 # Trap for the ctrl-c key combination
