@@ -25,9 +25,6 @@ VERBOSE_MSG=0
 # WRSTAT log (save calls to the wrc)
 WRSTAT="x"
 
-# How to interface with the WR device under test
-CONN=ssh
-
 # Etherbone variables
 ETHBONE_DISCOVER=./bin/eb-discover
 ETHBONE_DISCOVER_FLAGS=udp/
@@ -36,10 +33,10 @@ ETHBONE_DISCOVER_FLAGS=udp/
 VUART=./py7slib/shell.py
 
 # Flag to enable sync check
-SYNC=
+SYNC="OFF"
 
 # Temperature interval
-TEMP=
+TEMP="OFF"
 # BUS used for external sensors
 BUS="w1"
 BUS_PATH=/sys/bus/$BUS/devices/
@@ -54,24 +51,17 @@ OVENSWITCH="OFF"
 GPIOVEN=17
 
 # Set the remote server (ip or name)
-REMOTE=192.168.5.9
-# Time interval to check the sync status (seconds)
+REMOTE=
+
+# Default timeout
 INTERVAL=0
+
+# File where the result of each check will be stored
+HEADEREDOUT=0
+
 # Remote username (in the WRZEN is 'root' & pass 'root')
 REMOTE_USER='root'
 REMOTE_PASS='root'
-
-SSH_OPTIONS="-o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o LogLevel=error"
-
-TEST="/root/tools/zen/zen-vuart -c stat"
-
-# File where the result of each check will be stored
-LOG_FILE="x"
-
-# The python tool to check the stat output
-PYTOOL=./check_status.py
-
-CHECK="x"
 
 # Trap Ctrl-C and call ctrl_c() to end the test
 trap ctrl_c INT
