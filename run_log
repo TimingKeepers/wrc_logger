@@ -306,6 +306,31 @@ exit 0
 
 # -------------------------------------------
 
+# Main test loop
+test()
+{
+    # First check that the device is still alive
+    check_alive $REMOTE
+	WRSTAT=$(wrstat)
+    # Get temperature values from the sensors
+    temps=$(temp_check "$WRSTAT")
+
+    # Save synchronization status
+    if [ $SYNC == "ON" ]; then
+        syncs=$(sync_check "$WRSTAT")
+    fi
+
+    # Control of the temperature range
+    if [ $TEMP == "ON" ]; then
+        temp_range_check "$temps"
+        if [[ $? -gt 0 ]]; then exit $?; fi
+    fi
+
+    echo -e "$(date +%s) $temps $syncs"
+}
+
+# -------------------------------------------
+
 ctrl_c()
 {
   # Called from ctrl-c
