@@ -1,14 +1,14 @@
 #!/bin/bash
 ################################################################################
 ##
-## Script that logs the synchronization status in WR-devices and check that
+## Script that logs the synchronization status in WR-LEN and check that
 ## the servo state is "TRACK_PHASE"
 ##
 ## Authors:
 ##	- Felipe Torres González (torresfelipex1<AT>gmail.com)
-##	
+##	- Daniel Melgarejo García
 ##
-## System requirements: sshpass
+## System requirements: Etherbone
 ##
 ## GNU Lesser General Public License Usage
 ## This file may be used under the terms of the GNU Lesser
@@ -25,9 +25,6 @@ VERBOSE_MSG=0
 # WRSTAT log (save calls to the wrc)
 WRSTAT="x"
 
-# How to interface with the WR device under test
-CONN=ssh
-
 # Etherbone variables
 ETHBONE_DISCOVER=./bin/eb-discover
 ETHBONE_DISCOVER_FLAGS=udp/
@@ -36,10 +33,10 @@ ETHBONE_DISCOVER_FLAGS=udp/
 VUART=./py7slib/shell.py
 
 # Flag to enable sync check
-SYNC=
+SYNC="OFF"
 
 # Temperature interval
-TEMP=
+TEMP="OFF"
 # BUS used for external sensors
 BUS="w1"
 BUS_PATH=/sys/bus/$BUS/devices/
@@ -53,25 +50,19 @@ SENSORS=0
 OVENSWITCH="OFF"
 GPIOVEN=17
 
-# Set the remote server (ip or name)
-REMOTE=192.168.5.9
-# Time interval to check the sync status (seconds)
+# Remote device 
+REMOTE_NAME="WR LEN"
+REMOTE_ADDR=
+
+# Default timeout
 INTERVAL=0
+
+# File where the result of each check will be stored
+HEADEREDOUT=0
+
 # Remote username (in the WRZEN is 'root' & pass 'root')
 REMOTE_USER='root'
 REMOTE_PASS='root'
-
-SSH_OPTIONS="-o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o LogLevel=error"
-
-TEST="/root/tools/zen/zen-vuart -c stat"
-
-# File where the result of each check will be stored
-LOG_FILE="x"
-
-# The python tool to check the stat output
-PYTOOL=./check_status.py
-
-CHECK="x"
 
 # Trap Ctrl-C and call ctrl_c() to end the test
 trap ctrl_c INT
@@ -138,9 +129,9 @@ temp_check()
     cur_temp=$(read_tsensors)
     if [ $WRSTAT == "x" ]; then
 	echo "stat" > temp
-  	$VUART -i temp -o temp2 $REMOTE
+  	$VUART -i temp -o temp2 $REMOTE_ADDR
 	WRSTAT=`cat ./temp2` 
-	#WRSTAT=$($VUART -i temp $REMOTE | tail -6)
+	#WRSTAT=$($VUART -i temp $REMOTE_ADDR | tail -6)
     fi
     wrc_temp=$(echo $WRSTAT | grep -oh "temp: [0-9.]\{5\}.")
     echo "$cur_temp $wrc_temp"
@@ -176,7 +167,7 @@ temp_range_check()
 wrstat()
 {
     echo "stat" > temp
-    $VUART -i temp -o temp2 $REMOTE
+    $VUART -i temp -o temp2 $REMOTE_ADDR
     WRSTAT=`cat ./temp2`
     rm temp temp2	
     echo $WRSTAT
@@ -260,7 +251,7 @@ exit 0
 test()
 {
     # First check that the device is still alive
-    check_alive $REMOTE
+    check_alive $REMOTE_ADDR
 	WRSTAT=$(wrstat)
     # Get temperature values from the sensors
     temps=$(temp_check "$WRSTAT")
@@ -311,7 +302,7 @@ done
 # Main script -------------------------------
 
 echo -e "\033[1mRunning test...\033[0m"
-echo -e "\tConnecting to WRS ($REMOTE_ADDR)"
+echo -e "\tConnecting to WR LEN ($REMOTE_ADDR)"
 if [ $HEADEREDOUT == 1 ]; then
     echo "# Epoch seconds $tempsensors $devtemp $synclabels"
 fi
