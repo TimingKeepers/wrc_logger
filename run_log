@@ -50,8 +50,9 @@ SENSORS=0
 OVENSWITCH="OFF"
 GPIOVEN=17
 
-# Set the remote server (ip or name)
-REMOTE=
+# Remote device 
+REMOTE_NAME="WR LEN"
+REMOTE_ADDR=
 
 # Default timeout
 INTERVAL=0
