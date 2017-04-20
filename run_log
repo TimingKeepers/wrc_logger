@@ -129,9 +129,9 @@ temp_check()
     cur_temp=$(read_tsensors)
     if [ $WRSTAT == "x" ]; then
 	echo "stat" > temp
-  	$VUART -i temp -o temp2 $REMOTE
+  	$VUART -i temp -o temp2 $REMOTE_ADDR
 	WRSTAT=`cat ./temp2` 
-	#WRSTAT=$($VUART -i temp $REMOTE | tail -6)
+	#WRSTAT=$($VUART -i temp $REMOTE_ADDR | tail -6)
     fi
     wrc_temp=$(echo $WRSTAT | grep -oh "temp: [0-9.]\{5\}.")
     echo "$cur_temp $wrc_temp"
