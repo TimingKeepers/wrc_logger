@@ -201,20 +201,20 @@ sync_check()
     if [[ $VERBOSE_MSG -eq 1 ]]; then
         echo -e "Checking synchronization..."
     fi
-    WRMON=$1
+    WRSTAT=$1
     if [[ $VERBOSE_MSG -eq 1 ]]; then
         echo -e "\tLink Status: $link_status"
     fi
     # Save linkup and servo state
-    wrs_servo=$(echo $WRMON | grep -oh "lock:[0-1]")
-    wrs_TF=$(echo $WRMON | grep -oh "ss:.[A-Z_]\{11\}." | cut -d':' -f2)
+    wrs_servo=$(echo $WRSTAT | grep -oh "lock:[0-1]")
+    wrs_TF=$(echo $WRSTAT | grep -oh "ss:.[A-Z_]\{11\}." | cut -d':' -f2)
     echo -e "$wrs_servo sync:$wrs_TF\c"
     if [[ $SYNC_LEVEL -ge 2 ]]; then
       # Save Round Trip Time
-      rtt=$(echo $WRMON | grep -oh "mu:[0-9]*" | cut -d':' -f2)
+      rtt=$(echo $WRSTAT | grep -oh "mu:[0-9]*" | cut -d':' -f2)
       # Save bitslide values
-      drxm=$(echo $WRMON | grep -oh "drxm:[0-9]*" | cut -d':' -f2)
-      drxs=$(echo $WRMON | grep -oh "drxs:[0-9]*" | cut -d':' -f2)
+      drxm=$(echo $WRSTAT | grep -oh "drxm:[0-9]*" | cut -d':' -f2)
+      drxs=$(echo $WRSTAT | grep -oh "drxs:[0-9]*" | cut -d':' -f2)
       echo -e " rtt:$rtt drxm:$drxm drxs:$drxs"
     fi
 }
