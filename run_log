@@ -167,7 +167,7 @@ temp_range_check()
 wrstat()
 {
     echo "stat" > temp
-    $VUART -i temp -o temp2 $REMOTE
+    $VUART -i temp -o temp2 $REMOTE_ADDR
     WRSTAT=`cat ./temp2`
     rm temp temp2	
     echo $WRSTAT
@@ -251,7 +251,7 @@ exit 0
 test()
 {
     # First check that the device is still alive
-    check_alive $REMOTE
+    check_alive $REMOTE_ADDR
 	WRSTAT=$(wrstat)
     # Get temperature values from the sensors
     temps=$(temp_check "$WRSTAT")
@@ -302,7 +302,7 @@ done
 # Main script -------------------------------
 
 echo -e "\033[1mRunning test...\033[0m"
-echo -e "\tConnecting to WRS ($REMOTE_ADDR)"
+echo -e "\tConnecting to WR LEN ($REMOTE_ADDR)"
 if [ $HEADEREDOUT == 1 ]; then
     echo "# Epoch seconds $tempsensors $devtemp $synclabels"
 fi
