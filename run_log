@@ -127,7 +127,7 @@ temp_check()
     fi
     search_tsensors
     cur_temp=$(read_tsensors)
-    if [ $WRSTAT == "x" ]; then
+    if [[ $WRSTAT == "x" ]]; then
 	echo "stat" > temp
   	$VUART -i temp -o temp2 $REMOTE_ADDR
 	WRSTAT=`cat ./temp2` 
@@ -164,6 +164,15 @@ temp_range_check()
 
 # -------------------------------------------
 
+check_secureoff()
+{
+
+if [[ $1 -eq "" ]]; then
+        echo -e "\e[31mNot a valid device introduced. Exiting...\033[0m"
+        exit 1
+    fi
+}
+
 wrstat()
 {
     echo "stat" > temp
@@ -197,7 +206,7 @@ sync_check()
         echo -e "\tLink Status: $link_status"
     fi
     # Save linkup and servo state
-    wrs_servo=$(echo $WRSTAT | grep -oh "lock:[0-1]")
+    wrs_servo=$(echo $WRSTAT | grep -oh "lock:[0-1]" | head -n 1)
     wrs_TF=$(echo $WRSTAT | grep -oh "ss:.[A-Z_]\{11\}." | cut -d':' -f2)
     echo -e "$wrs_servo sync:$wrs_TF\c"
     if [[ $SYNC_LEVEL -ge 2 ]]; then
@@ -209,6 +218,8 @@ sync_check()
       echo -e " rtt:$rtt drxm:$drxm drxs:$drxs"
     fi
 }
+
+
 
 # -------------------------------------------
 
@@ -293,6 +304,7 @@ while [ $# -gt 0 ]; do # Until you run out of parameters . . .
         -x|--secureoff)
             OVENSWITCH="ON";
             SENSOR_TAG=$2;
+	    check_secureoff $SENSOR_TAG;
             shift;;
         *) echo "Unknown arg: $1"; help;;
     esac
