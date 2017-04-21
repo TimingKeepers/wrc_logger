@@ -43,11 +43,11 @@ except Exception as e:
 
 def apaga(len):
         GPIO.output(len, GPIO.LOW)
-        print 'Off',len
+        #print 'Off',len
 
 def enciende(len):
         GPIO.output(len, GPIO.HIGH)
-        print "On", len
+        #print "On", len
 
 if __name__ == "__main__":
         if len(sys.argv) > 2:
