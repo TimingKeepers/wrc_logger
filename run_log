@@ -168,7 +168,7 @@ check_secureoff()
 {
 
 if [[ $1 -eq "" ]]; then
-        echo -e "\e[31mNot a valid device introduced. Exiting...\033[0m"
+        echo -e "\e[31m-x parameter needs a temperature sensor's name (Sensor_Tag)\033[0m"
         exit 1
     fi
 }
