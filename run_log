@@ -164,6 +164,15 @@ temp_range_check()
 
 # -------------------------------------------
 
+check_secureoff()
+{
+
+if [[ $1 -eq "" ]]; then
+        echo -e "\e[31mNot a valid device introduced. Exiting...\033[0m"
+        exit 1
+    fi
+}
+
 wrstat()
 {
     echo "stat" > temp
@@ -295,6 +304,7 @@ while [ $# -gt 0 ]; do # Until you run out of parameters . . .
         -x|--secureoff)
             OVENSWITCH="ON";
             SENSOR_TAG=$2;
+	    check_secureoff $SENSOR_TAG;
             shift;;
         *) echo "Unknown arg: $1"; help;;
     esac
