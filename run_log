@@ -135,7 +135,7 @@ temp_check()
 	rm temp temp2
     fi
     wrc_temp=$(echo $WRSTAT | grep -oh "temp: [0-9.]\{5\}.")
-    echo "$cur_temp $wrc_temp"
+    echo "$cur_temp$wrc_temp"
 }
 
 # -------------------------------------------
@@ -167,7 +167,7 @@ temp_range_check()
 check_secureoff()
 {
 
-if [[ $1 -eq "" ]]; then
+if [[ $1 == "" ]]; then
         echo -e "\e[31m-x parameter needs a temperature sensor's name (Sensor_Tag)\033[0m"
         exit 1
     fi
