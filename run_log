@@ -132,10 +132,10 @@ temp_check()
   	$VUART -i temp -o temp2 $REMOTE_ADDR
 	WRSTAT=`cat ./temp2` 
 	#WRSTAT=$($VUART -i temp $REMOTE_ADDR | tail -6)
+	rm temp temp2
     fi
     wrc_temp=$(echo $WRSTAT | grep -oh "temp: [0-9.]\{5\}.")
-    echo "$cur_temp $wrc_temp"
-    rm temp temp2
+    echo "$cur_temp$wrc_temp"
 }
 
 # -------------------------------------------
@@ -167,8 +167,8 @@ temp_range_check()
 check_secureoff()
 {
 
-if [[ $1 -eq "" ]]; then
-        echo -e "\e[31mNot a valid device introduced. Exiting...\033[0m"
+if [[ $1 == "" ]]; then
+        echo -e "\e[31m-x parameter needs a temperature sensor's name (Sensor_Tag)\033[0m"
         exit 1
     fi
 }
